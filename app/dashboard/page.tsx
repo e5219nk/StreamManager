@@ -16,9 +16,9 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
-  const [monthlyTotals, setMonthlyTotals] = useState<any[]>([]);
-  const [listenerRanking, setListenerRanking] = useState<{ [key: string]: any[] }>({});
-  const [dailyTotals, setDailyTotals] = useState<any[]>([]);
+  const [monthlyTotals, setMonthlyTotals] = useState<string[]>([]);
+  const [listenerRanking, setListenerRanking] = useState<{ [key: string]: string[] }>({});
+  const [dailyTotals, setDailyTotals] = useState<string[]>([]);
   const [selectedMonth, setSelectedMonth] = useState('');
 
   useEffect(() => {
@@ -115,7 +115,7 @@ const Dashboard = () => {
     plugins: {
       tooltip: {
         callbacks: {
-          label: function (context: any) {
+          label: function (context: string) {
             return `投げ銭: ${context.parsed.y.toLocaleString()} コイン`;
           },
         },

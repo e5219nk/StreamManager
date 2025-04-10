@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 export default function Listeners() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
-  const [listeners, setListeners] = useState<any[]>([]);
+  const [listeners, setListeners] = useState<string[]>([]);
 
   useEffect(() => {
     // 既存のリスナー情報をAPIから取得
