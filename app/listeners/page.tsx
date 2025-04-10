@@ -39,6 +39,7 @@ export default function Listeners() {
     } else {
       setMessage('登録に失敗しました。');
     }
+  };
 
   return (
     <div className="p-4">
