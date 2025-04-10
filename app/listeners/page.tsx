@@ -1,18 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+
+type Listener = {
+  id?: string | number;
+  name: string;
+};
 
 export default function Listeners() {
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  const [listeners, setListeners] = useState<string[]>([]);
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
+  const [listeners, setListeners] = useState<Listener[]>([]);
 
   useEffect(() => {
-    // 既存のリスナー情報をAPIから取得
     const fetchListeners = async () => {
-      const response = await fetch("/api/listeners");
-      const data = await response.json();
-      console.log(data);  // listenersのデータを確認
+      const response = await fetch('/api/listeners');
+      const data: Listener[] = await response.json();
+      console.log(data);
       setListeners(data);
     };
 
@@ -21,22 +25,20 @@ export default function Listeners() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("/api/listeners", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('/api/listeners', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
 
     if (response.ok) {
-      setMessage("リスナーを登録しました！");
-      setName("");
-      // 新規リスナーを追加して表示を更新
-      const data = await response.json();
+      setMessage('リスナーを登録しました！');
+      setName('');
+      const data: Listener = await response.json();
       setListeners((prevListeners) => [...prevListeners, data]);
     } else {
-      setMessage("登録に失敗しました。");
+      setMessage('登録に失敗しました。');
     }
-  };
 
   return (
     <div className="p-4">

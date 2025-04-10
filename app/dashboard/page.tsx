@@ -15,17 +15,36 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+type MonthlyTotal = {
+  month: string;
+  totalCoins: number;
+};
+
+type DailyTotal = {
+  day: string;
+  totalCoins: number;
+};
+
+type ListenerRankingEntry = {
+  Name: string;
+  totalCoins: number;
+};
+
+type ListenerRankingData = {
+  [month: string]: ListenerRankingEntry[];
+};
+
 const Dashboard = () => {
-  const [monthlyTotals, setMonthlyTotals] = useState<string[]>([]);
-  const [listenerRanking, setListenerRanking] = useState<{ [key: string]: string[] }>({});
-  const [dailyTotals, setDailyTotals] = useState<string[]>([]);
+  const [monthlyTotals, setMonthlyTotals] = useState<MonthlyTotal[]>([]);
+  const [listenerRanking, setListenerRanking] = useState<ListenerRankingData>({});
+  const [dailyTotals, setDailyTotals] = useState<DailyTotal[]>([]);
   const [selectedMonth, setSelectedMonth] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const totalsRes = await fetch('/api/monthly-totals');
-        const totalsData = await totalsRes.json();
+        const totalsData: MonthlyTotal[] = await totalsRes.json();
         setMonthlyTotals(totalsData);
 
         if (totalsData.length > 0) {
@@ -35,7 +54,7 @@ const Dashboard = () => {
         }
 
         const dailyRes = await fetch('/api/daily-totals');
-        const dailyData = await dailyRes.json();
+        const dailyData: DailyTotal[] = await dailyRes.json();
         setDailyTotals(dailyData.reverse());
       } catch (error) {
         console.error('データ取得エラー:', error);
@@ -48,7 +67,7 @@ const Dashboard = () => {
   const fetchListenerRanking = async (month: string) => {
     try {
       const rankingRes = await fetch(`/api/listener-ranking?month=${month}`);
-      const rankingData = await rankingRes.json();
+      const rankingData: ListenerRankingData = await rankingRes.json();
       setListenerRanking((prev) => ({ ...prev, [month]: rankingData[month] || [] }));
     } catch (error) {
       console.error('リスナーランキング取得エラー:', error);
@@ -77,15 +96,13 @@ const Dashboard = () => {
     ],
   };
 
-  // 選択月のフィルタ
   const filteredDailyTotals = dailyTotals.filter((entry) => {
     const entryDate = new Date(entry.day);
     const entryMonth = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}`;
     return entryMonth === selectedMonth;
   });
 
-  // 一番投げられた日
-  const maxEntry = filteredDailyTotals.reduce(
+  const maxEntry = filteredDailyTotals.reduce<DailyTotal>(
     (max, entry) => (entry.totalCoins > max.totalCoins ? entry : max),
     { totalCoins: 0, day: '' }
   );
@@ -93,7 +110,6 @@ const Dashboard = () => {
     ? new Date(maxEntry.day).toLocaleDateString('ja-JP')
     : '';
 
-  // 日別グラフデータ
   const dailyChartData = {
     labels: filteredDailyTotals.map((entry) =>
       new Date(entry.day).toLocaleDateString('ja-JP')
@@ -115,7 +131,7 @@ const Dashboard = () => {
     plugins: {
       tooltip: {
         callbacks: {
-          label: function (context: string) {
+          label: function (context: { parsed: { y: number } }) {
             return `投げ銭: ${context.parsed.y.toLocaleString()} コイン`;
           },
         },
